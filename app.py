@@ -6,7 +6,6 @@ Backend API Server with SSH/Telnet/Console support
 
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
-import paramiko
 import telnetlib
 import io
 import threading
@@ -14,7 +13,8 @@ import time
 import json
 import logging
 from datetime import datetime
-import os
+
+from ssh_session import SSHSession
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -254,7 +254,7 @@ class FortiGateConnection:
         self.password = password
         self.connection_type = connection_type
         self.client = None
-        self.shell = None
+        self.ssh_session = None
         self.output_buffer = []
         self.is_monitoring = False
         self.monitor_thread = None
@@ -263,24 +263,17 @@ class FortiGateConnection:
     def connect_ssh(self):
         """SSH连接"""
         try:
-            logger.debug("Initializing SSH client for %s:%s", self.host, self.port)
-            self.client = paramiko.SSHClient()
-            self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            self.client.connect(
-                self.host,
-                port=self.port,
-                username=self.username,
-                password=self.password,
-                timeout=10,
-                allow_agent=False,
-                look_for_keys=False
-            )
-            self.shell = self.client.invoke_shell(width=200, height=50)
-            time.sleep(1)
-            # 清空初始输出
-            if self.shell.recv_ready():
-                logger.debug("Clearing initial SSH channel output for %s", self.host)
-                self.shell.recv(65535)
+            logger.debug("Initializing SSH session for %s:%s", self.host, self.port)
+            device = {
+                "device_ip": self.host,
+                "device_port": str(self.port),
+                "device_login_name": self.username,
+                "device_password": self.password,
+                "device_name": self.host,
+            }
+            self.ssh_session = SSHSession(device)
+            # Clear any banner output captured during connection
+            _ = self.ssh_session.poll().get("output", "")
             return True, "SSH连接成功"
         except Exception as e:
             logger.exception("SSH connection failed for %s:%s", self.host, self.port)
@@ -318,12 +311,12 @@ class FortiGateConnection:
         try:
             if self.connection_type == 'ssh':
                 logger.debug("Sending SSH command: %s", command)
-                self.shell.send(command + "\n")
+                if not self.ssh_session:
+                    return "SSH会话未初始化"
+                self.ssh_session.send_input(command + "\n")
                 time.sleep(wait_time)
-                output = ""
-                while self.shell.recv_ready():
-                    output += self.shell.recv(65535).decode('utf-8', errors='ignore')
-                return output
+                poll_result = self.ssh_session.poll()
+                return poll_result.get("output", "")
             elif self.connection_type == 'telnet':
                 logger.debug("Sending Telnet command: %s", command)
                 self.client.write(command.encode('ascii') + b"\n")
@@ -356,14 +349,16 @@ class FortiGateConnection:
         """监控输出线程"""
         while self.is_monitoring:
             try:
-                if self.connection_type == 'ssh' and self.shell.recv_ready():
-                    data = self.shell.recv(65535).decode('utf-8', errors='ignore')
+                if self.connection_type == 'ssh' and self.ssh_session:
+                    poll_result = self.ssh_session.poll()
+                    data = poll_result.get('output', '')
                     if data:
                         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-                        formatted = f"[{timestamp}] {data}"
-                        self.output_buffer.append(formatted)
-                        if self.current_output_id and self.current_output_id in debug_outputs:
-                            debug_outputs[self.current_output_id]['output'].append(formatted)
+                        for line in data.splitlines(True):
+                            formatted = f"[{timestamp}] {line}"
+                            self.output_buffer.append(formatted)
+                            if self.current_output_id and self.current_output_id in debug_outputs:
+                                debug_outputs[self.current_output_id]['output'].append(formatted)
                 elif self.connection_type == 'telnet':
                     data = self.client.read_very_eager().decode('utf-8', errors='ignore')
                     if data:
@@ -409,8 +404,11 @@ class FortiGateConnection:
         if self.monitor_thread:
             self.monitor_thread.join(timeout=2)
         
-        if self.connection_type == 'ssh' and self.client:
-            self.client.close()
+        if self.connection_type == 'ssh':
+            if self.ssh_session:
+                self.ssh_session.close()
+            elif self.client:
+                self.client.close()
         elif self.connection_type == 'telnet' and self.client:
             self.client.close()
 
