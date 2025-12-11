@@ -66,11 +66,18 @@
             const [debugOutput, setDebugOutput] = useState([]);
             const [message, setMessage] = useState({ type: '', text: '' });
             const [autoScroll, setAutoScroll] = useState(true);
+            const [stats, setStats] = useState({ total_sessions: 0, unique_users: 0, active_sessions: 0 });
             const outputRef = useRef(null);
 
             // 加载debug模式列表
             useEffect(() => {
                 fetchDebugModes();
+                fetchStats();
+            }, []);
+
+            useEffect(() => {
+                const statsTimer = setInterval(fetchStats, 5000);
+                return () => clearInterval(statsTimer);
             }, []);
 
             // 自动滚动输出
@@ -114,6 +121,22 @@
                     setDebugModes(data.modes);
                 } catch (error) {
                     showMessage('error', '加载debug模式失败');
+                }
+            };
+
+            const fetchStats = async () => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/stats`);
+                    const data = await response.json();
+                    if (data.success) {
+                        setStats({
+                            total_sessions: data.total_sessions,
+                            unique_users: data.unique_users,
+                            active_sessions: data.active_sessions
+                        });
+                    }
+                } catch (error) {
+                    console.error('加载统计信息失败:', error);
                 }
             };
 
@@ -456,6 +479,18 @@
                                             <div className="flex justify-between">
                                                 <span className="text-gray-600">输出行数:</span>
                                                 <span className="font-bold">{debugOutput.length}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">总会话数:</span>
+                                                <span className="font-bold">{stats.total_sessions}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">唯一用户数:</span>
+                                                <span className="font-bold">{stats.unique_users}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">活跃会话:</span>
+                                                <span className="font-bold">{stats.active_sessions}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-gray-600">状态:</span>
