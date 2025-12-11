@@ -66,6 +66,8 @@
             const [debugOutput, setDebugOutput] = useState([]);
             const [message, setMessage] = useState({ type: '', text: '' });
             const [autoScroll, setAutoScroll] = useState(true);
+            const [customCommands, setCustomCommands] = useState('');
+            const [customStopCommands, setCustomStopCommands] = useState('');
             const [stats, setStats] = useState({ total_sessions: 0, unique_users: 0, active_sessions: 0 });
             const [loading, setLoading] = useState({
                 connect: false,
@@ -73,7 +75,8 @@
                 stop: false,
                 download: false,
                 disconnect: false,
-                clear: false
+                clear: false,
+                customStart: false
             });
             const outputRef = useRef(null);
 
@@ -243,19 +246,63 @@
                 }
             };
 
-            const handleStopDebug = async () => {
-                setLoading(prev => ({ ...prev, stop: true }));
+            const handleStartCustomDebug = async () => {
+                if (!customCommands.trim()) {
+                    showMessage('error', 'Please enter at least one command to run');
+                    return;
+                }
+
+                setLoading(prev => ({ ...prev, customStart: true }));
                 try {
-                    const response = await fetch(`${API_BASE_URL}/stop-debug`, {
+                    const response = await fetch(`${API_BASE_URL}/start-debug`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
                             session_id: sessionId,
-                            output_id: outputId,
-                            debug_mode: selectedMode
+                            debug_mode: 'custom',
+                            custom_commands: customCommands,
+                            custom_stop_commands: customStopCommands
                         })
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        setSelectedMode('custom');
+                        setIsMonitoring(true);
+                        setOutputId(data.output_id);
+                        setDebugOutput([]);
+                        showMessage('success', data.message);
+                    } else {
+                        showMessage('error', data.message);
+                    }
+                } catch (error) {
+                    showMessage('error', 'Failed to start custom debug: ' + error.message);
+                } finally {
+                    setLoading(prev => ({ ...prev, customStart: false }));
+                }
+            };
+
+            const handleStopDebug = async () => {
+                setLoading(prev => ({ ...prev, stop: true }));
+                try {
+                    const payload = {
+                        session_id: sessionId,
+                        output_id: outputId,
+                        debug_mode: selectedMode
+                    };
+
+                    if (selectedMode === 'custom') {
+                        payload.custom_stop_commands = customStopCommands;
+                    }
+
+                    const response = await fetch(`${API_BASE_URL}/stop-debug`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload)
                     });
                     const data = await response.json();
                     
@@ -474,12 +521,12 @@
                                                     onClick={handleStopDebug}
                                                     disabled={loading.stop}
                                                 >
-                                                    {loading.stop ? 'Stopping...' : 'Stop Monitoring'}
-                                                </button>
-                                            )}
+                                                {loading.stop ? 'Stopping...' : 'Stop Monitoring'}
+                                            </button>
+                                        )}
 
-                                            <button
-                                                className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-200"
+                                        <button
+                                            className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-200"
                                                 onClick={handleDownload}
                                                 disabled={!outputId || debugOutput.length === 0 || loading.download}
                                             >
@@ -491,9 +538,39 @@
                                                 onClick={handleDisconnect}
                                                 disabled={loading.disconnect}
                                             >
-                                                {loading.disconnect ? 'Disconnecting...' : 'Disconnect'}
-                                            </button>
-                                        </div>
+                                            {loading.disconnect ? 'Disconnecting...' : 'Disconnect'}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                    <div className="bg-white rounded-xl shadow-lg p-6 card-hover transition duration-200">
+                                        <h3 className="text-xl font-bold mb-4 text-gray-900">Custom CLI Monitoring</h3>
+                                        <p className="text-sm text-gray-600 mb-3">Enter one command per line to start monitoring with your own console commands.</p>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Start commands</label>
+                                        <textarea
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 mb-4"
+                                            rows="4"
+                                            placeholder="diagnose debug reset&#10;diagnose debug enable"
+                                            value={customCommands}
+                                            onChange={(e) => setCustomCommands(e.target.value)}
+                                            disabled={loading.customStart || isMonitoring}
+                                        ></textarea>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Stop commands (optional)</label>
+                                        <textarea
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 mb-4"
+                                            rows="3"
+                                            placeholder="diagnose debug reset"
+                                            value={customStopCommands}
+                                            onChange={(e) => setCustomStopCommands(e.target.value)}
+                                            disabled={loading.customStart || isMonitoring}
+                                        ></textarea>
+                                        <button
+                                            className="w-full bg-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-700 transition duration-200"
+                                            onClick={handleStartCustomDebug}
+                                            disabled={loading.customStart || isMonitoring}
+                                        >
+                                            {loading.customStart ? 'Starting custom monitoring...' : 'Start Custom Monitoring'}
+                                        </button>
                                     </div>
 
                                     {/* Display options */}

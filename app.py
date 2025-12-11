@@ -334,14 +334,22 @@ class FortiGateConnection:
             logger.exception("Command execution error on %s via %s", self.host, self.connection_type)
             return f"Command execution error: {str(e)}"
 
-    def start_debug_monitoring(self, debug_mode):
-        """Start debug monitoring for the selected mode"""
-        if debug_mode not in DEBUG_MODES:
-            return False, "Invalid debug mode"
+    def start_debug_monitoring(self, debug_mode, commands=None):
+        """Start debug monitoring for the selected mode or custom commands"""
+        if debug_mode == 'custom':
+            if not commands:
+                return False, "Custom commands are required"
+            start_commands = commands
+            mode_name = "custom commands"
+        else:
+            if debug_mode not in DEBUG_MODES:
+                return False, "Invalid debug mode"
+            mode_config = DEBUG_MODES[debug_mode]
+            start_commands = mode_config['commands']
+            mode_name = mode_config['name']
 
         # Send debug start commands
-        mode_config = DEBUG_MODES[debug_mode]
-        for cmd in mode_config['commands']:
+        for cmd in start_commands:
             self.send_command(cmd, wait_time=0.5)
         
         self.is_monitoring = True
@@ -351,7 +359,7 @@ class FortiGateConnection:
 
         logger.info("Started debug monitoring: mode=%s session=%s", debug_mode, self.current_output_id)
 
-        return True, f"Started monitoring {mode_config['name']}"
+        return True, f"Started monitoring {mode_name}"
 
     def _monitor_output(self):
         """Background thread to collect device output"""
@@ -379,13 +387,17 @@ class FortiGateConnection:
                 self.output_buffer.append(f"Monitoring error: {str(e)}")
                 break
 
-    def stop_debug_monitoring(self, debug_mode):
+    def stop_debug_monitoring(self, debug_mode, stop_commands=None):
         """Stop debug monitoring for the selected mode"""
         self.is_monitoring = False
 
         logger.info("Stopping debug monitoring: mode=%s session=%s", debug_mode, self.current_output_id)
 
-        if debug_mode in DEBUG_MODES:
+        if debug_mode == 'custom':
+            if stop_commands:
+                for cmd in stop_commands:
+                    self.send_command(cmd, wait_time=0.5)
+        elif debug_mode in DEBUG_MODES:
             mode_config = DEBUG_MODES[debug_mode]
             for cmd in mode_config['stop_commands']:
                 self.send_command(cmd, wait_time=0.5)
@@ -475,6 +487,17 @@ def start_debug():
     data = request.json
     session_id = data.get('session_id')
     debug_mode = data.get('debug_mode')
+    custom_commands = data.get('custom_commands')
+    custom_stop_commands = data.get('custom_stop_commands')
+
+    def _parse_commands(cmds):
+        if not cmds:
+            return []
+        if isinstance(cmds, str):
+            return [c.strip() for c in cmds.splitlines() if c.strip()]
+        if isinstance(cmds, list):
+            return [str(c).strip() for c in cmds if str(c).strip()]
+        return []
 
     if session_id not in active_sessions:
         return jsonify({'success': False, 'message': 'Invalid session ID'}), 400
@@ -482,16 +505,26 @@ def start_debug():
     conn = active_sessions[session_id]
     output_id = f"{session_id}_{debug_mode}_{int(time.time())}"
     logger.info("Starting debug", extra={'session_id': session_id, 'debug_mode': debug_mode, 'output_id': output_id})
+    parsed_custom_commands = _parse_commands(custom_commands)
+    parsed_custom_stop_commands = _parse_commands(custom_stop_commands)
+
     debug_outputs[output_id] = {
         'session_id': session_id,
         'debug_mode': debug_mode,
         'start_time': datetime.now().isoformat(),
-        'output': []
+        'output': [],
+        'start_commands': parsed_custom_commands if debug_mode == 'custom' else DEBUG_MODES.get(debug_mode, {}).get('commands', []),
+        'stop_commands': parsed_custom_stop_commands if debug_mode == 'custom' else DEBUG_MODES.get(debug_mode, {}).get('stop_commands', [])
     }
 
     conn.current_output_id = output_id
 
-    success, message = conn.start_debug_monitoring(debug_mode)
+    if debug_mode == 'custom':
+        if not parsed_custom_commands:
+            return jsonify({'success': False, 'message': 'Custom commands are required'}), 400
+        success, message = conn.start_debug_monitoring(debug_mode, parsed_custom_commands)
+    else:
+        success, message = conn.start_debug_monitoring(debug_mode)
 
     if success:
         return jsonify({
@@ -513,13 +546,25 @@ def stop_debug():
     session_id = data.get('session_id')
     output_id = data.get('output_id')
     debug_mode = data.get('debug_mode')
+    custom_stop_commands = data.get('custom_stop_commands')
 
     if session_id not in active_sessions:
         return jsonify({'success': False, 'message': 'Invalid session ID'}), 400
 
     conn = active_sessions[session_id]
     logger.info("Stopping debug", extra={'session_id': session_id, 'debug_mode': debug_mode, 'output_id': output_id})
-    success, message = conn.stop_debug_monitoring(debug_mode)
+    stop_commands = []
+    if debug_mode == 'custom':
+        # Prefer provided stop commands, fall back to stored commands for this output
+        if custom_stop_commands:
+            if isinstance(custom_stop_commands, str):
+                stop_commands = [c.strip() for c in custom_stop_commands.splitlines() if c.strip()]
+            elif isinstance(custom_stop_commands, list):
+                stop_commands = [str(c).strip() for c in custom_stop_commands if str(c).strip()]
+        elif output_id and output_id in debug_outputs:
+            stop_commands = debug_outputs[output_id].get('stop_commands', [])
+
+    success, message = conn.stop_debug_monitoring(debug_mode, stop_commands)
 
     conn.current_output_id = None
 
