@@ -22,6 +22,12 @@ CORS(app)
 active_sessions = {}
 debug_outputs = {}
 
+# Usage tracking
+usage_metrics = {
+    'total_sessions': 0,
+    'unique_users': set()
+}
+
 # FortiGate Debug Commands Configuration
 DEBUG_MODES = {
     "authentication": {
@@ -245,6 +251,7 @@ class FortiGateConnection:
         self.output_buffer = []
         self.is_monitoring = False
         self.monitor_thread = None
+        self.current_output_id = None
         
     def connect_ssh(self):
         """SSH连接"""
@@ -334,12 +341,18 @@ class FortiGateConnection:
                     data = self.shell.recv(65535).decode('utf-8', errors='ignore')
                     if data:
                         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-                        self.output_buffer.append(f"[{timestamp}] {data}")
+                        formatted = f"[{timestamp}] {data}"
+                        self.output_buffer.append(formatted)
+                        if self.current_output_id and self.current_output_id in debug_outputs:
+                            debug_outputs[self.current_output_id]['output'].append(formatted)
                 elif self.connection_type == 'telnet':
                     data = self.client.read_very_eager().decode('utf-8', errors='ignore')
                     if data:
                         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-                        self.output_buffer.append(f"[{timestamp}] {data}")
+                        formatted = f"[{timestamp}] {data}"
+                        self.output_buffer.append(formatted)
+                        if self.current_output_id and self.current_output_id in debug_outputs:
+                            debug_outputs[self.current_output_id]['output'].append(formatted)
                 time.sleep(0.1)
             except Exception as e:
                 self.output_buffer.append(f"监控错误: {str(e)}")
@@ -417,6 +430,8 @@ def connect_fortigate():
     
     if success:
         active_sessions[session_id] = conn
+        usage_metrics['total_sessions'] += 1
+        usage_metrics['unique_users'].add(username)
         return jsonify({
             'success': True,
             'session_id': session_id,
@@ -435,26 +450,29 @@ def start_debug():
     
     if session_id not in active_sessions:
         return jsonify({'success': False, 'message': '无效的会话ID'}), 400
-    
+
     conn = active_sessions[session_id]
+    output_id = f"{session_id}_{debug_mode}_{int(time.time())}"
+    debug_outputs[output_id] = {
+        'session_id': session_id,
+        'debug_mode': debug_mode,
+        'start_time': datetime.now().isoformat(),
+        'output': []
+    }
+
+    conn.current_output_id = output_id
+
     success, message = conn.start_debug_monitoring(debug_mode)
-    
+
     if success:
-        # 初始化输出存储
-        output_id = f"{session_id}_{debug_mode}_{int(time.time())}"
-        debug_outputs[output_id] = {
-            'session_id': session_id,
-            'debug_mode': debug_mode,
-            'start_time': datetime.now().isoformat(),
-            'output': []
-        }
-        
         return jsonify({
             'success': True,
             'output_id': output_id,
             'message': message
         })
     else:
+        conn.current_output_id = None
+        debug_outputs.pop(output_id, None)
         return jsonify({'success': False, 'message': message}), 500
 
 
@@ -471,7 +489,9 @@ def stop_debug():
     
     conn = active_sessions[session_id]
     success, message = conn.stop_debug_monitoring(debug_mode)
-    
+
+    conn.current_output_id = None
+
     # 保存最终输出
     if output_id and output_id in debug_outputs:
         final_output = conn.get_output()
@@ -495,10 +515,21 @@ def get_output():
     
     conn = active_sessions[session_id]
     output = conn.get_output()
-    
+
     return jsonify({
         'success': True,
         'output': output
+    })
+
+
+@app.route('/api/stats', methods=['GET'])
+def get_stats():
+    """获取基础使用统计信息"""
+    return jsonify({
+        'success': True,
+        'total_sessions': usage_metrics['total_sessions'],
+        'unique_users': len(usage_metrics['unique_users']),
+        'active_sessions': len(active_sessions)
     })
 
 
