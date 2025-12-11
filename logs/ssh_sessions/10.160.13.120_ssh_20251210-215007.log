@@ -1,0 +1,30 @@
+SSH Connection: admin@10.160.13.120:22
+Started: 2025-12-10 21:50:07.546088
+------------------------------------------------------------
+******WARNING: This firmware failed signature validation.******
+Fortinet cannot verify the authenticity of this firmware and therefore
+there may be a risk that the firmware contains code unknown to Fortinet.
+In short, Fortinet cannot validate the firmware and makes no warranties
+or representations concerning the firmware.
+
+FGT_HA_Slave (Interim)# diagnose debug reset
+diagnose debug console timestamp enable
+diagnose debug application forticldd 255
+diagnose fortitoken debug enable
+
+FGT_HA_Slave (Interim)# diagnose debug console timestamp enable
+
+FGT_HA_Slave (Interim)# diagnose debug application forticldd 255
+Debug messages will be on for 30 minutes.
+
+FGT_HA_Slave (Interim)# diagnose fortitoken debug enable
+Debug messages will be on for 30 minutes.
+
+FGT_HA_Slave (Interim)# diagnose fortitoken debug disable
+
+FGT_HA_Slave (Interim)# diagnose debug application forticldd 0
+
+FGT_HA_Slave (Interim)# diagnose debug reset
+
+FGT_HA_Slave (Interim)# 
+[Session closed at 2025-12-10 21:51:25.645053] Exit=None

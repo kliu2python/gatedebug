@@ -55,7 +55,8 @@ DEBUG_MODES = {
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
             "diagnose debug application forticldd 255",
-            "diagnose fortitoken debug enable"
+            "diagnose fortitoken debug enable",
+            "diagnose debug enable"
         ],
         "stop_commands": [
             "diagnose fortitoken debug disable",

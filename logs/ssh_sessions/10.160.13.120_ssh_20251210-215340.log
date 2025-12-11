@@ -1,0 +1,219 @@
+SSH Connection: admin@10.160.13.120:22
+Started: 2025-12-10 21:53:40.190084
+------------------------------------------------------------
+******WARNING: This firmware failed signature validation.******
+Fortinet cannot verify the authenticity of this firmware and therefore
+there may be a risk that the firmware contains code unknown to Fortinet.
+In short, Fortinet cannot validate the firmware and makes no warranties
+or representations concerning the firmware.
+
+FGT_HA_Slave (Interim)# diagnose debug reset
+diagnose debug console timestamp enable
+diagnose debug application forticldd -1
+diagnose fortitoken debug enable
+
+FGT_HA_Slave (Interim)# diagnose debug console timestamp enable
+
+FGT_HA_Slave (Interim)# diagnose debug application forticldd -1
+Debug messages will be on for 30 minutes.
+
+FGT_HA_Slave (Interim)# diagnose fortitoken debug enable
+Debug messages will be on for 30 minutes.
+
+FGT_HA_Slave (Interim)# diagnose debug enable
+
+FGT_HA_Slave (Interim)# 2025-12-10 21:54:00 [3551] fds_handle_request: Received cmd 33 from pid-29755, len 12
+2025-12-10 21:54:00 [37] fds_queue_task: req-33 is added to ftc
+2025-12-10 21:54:00 [614] fds_https_start_server: server: 69.167.109.248:8686
+2025-12-10 21:54:00 [615] fds_https_start_server: source-ip: 0.0.0.0:0
+2025-12-10 21:54:00 [119] __ssl_cert_ctx_load: Added cert FGT40FHA25099UXR, root ca Fortinet_CA, idx 0 (default)
+2025-12-10 21:54:00 [119] __ssl_cert_ctx_load: Added cert FGT40FHA25099UXR, root ca Fortinet_CA_Backup, idx 1 
+2025-12-10 21:54:00 [843] ssl_ctx_create_new: SSL CTX is created
+2025-12-10 21:54:00 [870] ssl_new: SSL object is created
+2025-12-10 21:54:00 [937] ssl_set_hostname: Set hostname 'fortinet-ca2.fortinet.com'
+2025-12-10 21:54:00 [93] https_create: proxy server 0.0.0.0 port:0
+2025-12-10 21:54:00 [592] __tcps_tcp_start_connect: sockfd=11, server=69.167.109.248:8686, use_harelay=0, use_proxy=0
+2025-12-10 21:54:00 [596] __tcps_tcp_start_connect: ret=-1
+2025-12-10 21:54:00 [601] __tcps_tcp_start_connect: errno=115(Operation now in progress)
+2025-12-10 21:54:00 [888] tcps_connect: 69.167.109.248:8686 -- ret 0, state 0x0(Intialized) -> 0x11(Connecting)
+2025-12-10 21:54:00 [888] tcps_connect: 69.167.109.248:8686 -- ret 0, state 0x11(Connecting) -> 0x12(SSL-Connecting)
+2025-12-10 21:54:00 [735] __ssl_info_callback: before SSL initialization
+2025-12-10 21:54:00 [735] __ssl_info_callback: SSLv3/TLS write client hello
+2025-12-10 21:54:00 [888] tcps_connect: 69.167.109.248:8686 -- ret 1, state 0x12(SSL-Connecting) -> 0x12(SSL-Connecting)
+2025-12-10 21:54:00 [735] __ssl_info_callback: SSLv3/TLS write client hello
+2025-12-10 21:54:00 [735] __ssl_info_callback: SSLv3/TLS read server hello
+2025-12-10 21:54:00 [735] __ssl_info_callback: SSLv3/TLS read server certificate
+2025-12-10 21:54:00 [758] __ssl_info_callback: Current cert idx 0, SSL verion 'TLS 1.2'
+2025-12-10 21:54:00 [770] __ssl_info_callback: Got server cert chain, num 2
+2025-12-10 21:54:00 [778] __ssl_info_callback: Server root issuer /C=US/ST=California/L=Sunnyvale/O=Fortinet/OU=Certificate Authority/CN=fortinet-ca2/emailAddress=support@fortinet.com
+2025-12-10 21:54:00 [781] __ssl_info_callback: Client root issuer /C=US/ST=California/L=Sunnyvale/O=Fortinet/OU=Certificate Authority/CN=fortinet-ca2/emailAddress=support@fortinet.com
+2025-12-10 21:54:00 [735] __ssl_info_callback: SSLv3/TLS read server certificate request
+2025-12-10 21:54:00 [735] __ssl_info_callback: SSLv3/TLS read server done
+2025-12-10 21:54:00 [735] __ssl_info_callback: SSLv3/TLS write client certificate
+2025-12-10 21:54:00 [735] __ssl_info_callback: SSLv3/TLS write client key exchange
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS write certificate verify
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS write change cipher spec
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS write finished
+2025-12-10 21:54:01 [888] tcps_connect: 69.167.109.248:8686 -- ret 1, state 0x12(SSL-Connecting) -> 0x12(SSL-Connecting)
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS write finished
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS read server session ticket
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS read change cipher spec
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS read finished
+2025-12-10 21:54:01 [773] __tcps_ssl_connect: SSL connected.
+2025-12-10 21:54:01 [888] tcps_connect: 69.167.109.248:8686 -- ret 0, state 0x12(SSL-Connecting) -> 0x5(Established)
+2025-12-10 21:54:01 [507] fds_https_connect: https_connect(69.167.109.248:8686) is established.
+2025-12-10 21:54:01 [300] fds_svr_default_on_established: ftc has connected to ip=69.167.109.248:8686
+2025-12-10 21:54:01 [307] fds_svr_default_on_established: server-ftc handles cmd-33
+2025-12-10 21:54:01 [53] ftc_req: Fortitoken cloud receive request, cmd=0.
+2025-12-10 21:54:01 [130] fds_print_msg: http request: len=286
+2025-12-10 21:54:01 [137] fds_print_msg: GET /api/v1/balance?&sn=FGT40FTK24099WAR&cluster_members=%5B%27FGT40FTK24099WAR%27%2C%20%27FGT40FTK24099VVY%27%5D&group_name=ZTP-VSN-HA-989&group_id=989 HTTP/1.1
+2025-12-10 21:54:01 [137] fds_print_msg: Host: 69.167.109.248:8686
+2025-12-10 21:54:01 [137] fds_print_msg: User-Agent: FortiGate-40F v7.4.10,build5309,251208 (interim)
+2025-12-10 21:54:01 [137] fds_print_msg: Content-Type: application/json
+2025-12-10 21:54:01 [511] fds_https_connect: http request to 69.167.109.248:8686: header=286, ext=0.
+2025-12-10 21:54:01 [245] fds_https_send: sent 286 bytes: pos=0, len=286
+2025-12-10 21:54:01 [260] fds_https_send: sent the entire request to server: 69.167.109.248:8686
+2025-12-10 21:54:01 [296] fds_https_recv: read 314 bytes: pos=314, buf_len=8192
+2025-12-10 21:54:01 [318] fds_https_recv: received the header from server: 69.167.109.248:8686, [HTTP/1.1 403 FORBIDDEN
+Server: nginx
+Date: Thu, 11 Dec 2025 05:54:01 GMT
+Content-Type: application/json
+Content-Length: 164
+Connection: close]
+2025-12-10 21:54:01 [328] fds_https_recv: response code is 403: [HTTP/1.1 403 FORBIDDEN
+Server: nginx
+Date: Thu, 11 Dec 2025 05:54:01 GMT
+Content-Type: application/json
+Content-Length: 164
+Connection: close]
+2025-12-10 21:54:01 [667] fds_https_stop_server: 69.167.109.248:8686
+2025-12-10 21:54:01 [212] __ssl_data_ctx_free: Done
+2025-12-10 21:54:01 [1123] ssl_free: Done
+2025-12-10 21:54:01 [204] __ssl_cert_ctx_free: Done
+2025-12-10 21:54:01 [1133] ssl_ctx_free: Done
+2025-12-10 21:54:01 [1114] ssl_disconnect: Shutdown
+2025-12-10 21:54:01 [333] fds_svr_default_on_response: server-ftc handles cmd-33
+2025-12-10 21:54:01 [95] ftc_res: FortiToken-Cloud internal error
+2025-12-10 21:54:01 [667] fds_https_stop_server: 69.167.109.248:8686
+2025-12-10 21:54:01 [471] fds_free_tsk: cmd=33; req.noreply=0
+2025-12-10 21:54:01 [527] fds_send_reply: Sending 0 bytes data.
+2025-12-10 21:54:01 [3551] fds_handle_request: Received cmd 33 from pid-29755, len 12
+2025-12-10 21:54:01 [37] fds_queue_task: req-33 is added to ftc
+2025-12-10 21:54:01 [614] fds_https_start_server: server: 69.167.109.248:8686
+2025-12-10 21:54:01 [615] fds_https_start_server: source-ip: 0.0.0.0:0
+2025-12-10 21:54:01 [119] __ssl_cert_ctx_load: Added cert FGT40FHA25099UXR, root ca Fortinet_CA, idx 0 (default)
+2025-12-10 21:54:01 [119] __ssl_cert_ctx_load: Added cert FGT40FHA25099UXR, root ca Fortinet_CA_Backup, idx 1 
+2025-12-10 21:54:01 [843] ssl_ctx_create_new: SSL CTX is created
+2025-12-10 21:54:01 [870] ssl_new: SSL object is created
+2025-12-10 21:54:01 [937] ssl_set_hostname: Set hostname 'fortinet-ca2.fortinet.com'
+2025-12-10 21:54:01 [93] https_create: proxy server 0.0.0.0 port:0
+2025-12-10 21:54:01 [592] __tcps_tcp_start_connect: sockfd=11, server=69.167.109.248:8686, use_harelay=0, use_proxy=0
+2025-12-10 21:54:01 [596] __tcps_tcp_start_connect: ret=-1
+2025-12-10 21:54:01 [601] __tcps_tcp_start_connect: errno=115(Operation now in progress)
+2025-12-10 21:54:01 [888] tcps_connect: 69.167.109.248:8686 -- ret 0, state 0x0(Intialized) -> 0x11(Connecting)
+2025-12-10 21:54:01 [888] tcps_connect: 69.167.109.248:8686 -- ret 0, state 0x11(Connecting) -> 0x12(SSL-Connecting)
+2025-12-10 21:54:01 [735] __ssl_info_callback: before SSL initialization
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS write client hello
+2025-12-10 21:54:01 [888] tcps_connect: 69.167.109.248:8686 -- ret 1, state 0x12(SSL-Connecting) -> 0x12(SSL-Connecting)
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS write client hello
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS read server hello
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS read server certificate
+2025-12-10 21:54:01 [758] __ssl_info_callback: Current cert idx 0, SSL verion 'TLS 1.2'
+2025-12-10 21:54:01 [770] __ssl_info_callback: Got server cert chain, num 2
+2025-12-10 21:54:01 [778] __ssl_info_callback: Server root issuer /C=US/ST=California/L=Sunnyvale/O=Fortinet/OU=Certificate Authority/CN=fortinet-ca2/emailAddress=support@fortinet.com
+2025-12-10 21:54:01 [781] __ssl_info_callback: Client root issuer /C=US/ST=California/L=Sunnyvale/O=Fortinet/OU=Certificate Authority/CN=fortinet-ca2/emailAddress=support@fortinet.com
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS read server certificate request
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS read server done
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS write client certificate
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS write client key exchange
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS write certificate verify
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS write change cipher spec
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS write finished
+2025-12-10 21:54:01 [888] tcps_connect: 69.167.109.248:8686 -- ret 1, state 0x12(SSL-Connecting) -> 0x12(SSL-Connecting)
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS write finished
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS read server session ticket
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS read change cipher spec
+2025-12-10 21:54:01 [735] __ssl_info_callback: SSLv3/TLS read finished
+2025-12-10 21:54:01 [773] __tcps_ssl_connect: SSL connected.
+2025-12-10 21:54:01 [888] tcps_connect: 69.167.109.248:8686 -- ret 0, state 0x12(SSL-Connecting) -> 0x5(Established)
+2025-12-10 21:54:01 [507] fds_https_connect: https_connect(69.167.109.248:8686) is established.
+2025-12-10 21:54:01 [300] fds_svr_default_on_established: ftc has connected to ip=69.167.109.248:8686
+2025-12-10 21:54:01 [307] fds_svr_default_on_established: server-ftc handles cmd-33
+2025-12-10 21:54:01 [53] ftc_req: Fortitoken cloud receive request, cmd=1.
+2025-12-10 21:54:01 [130] fds_print_msg: http request: len=297
+2025-12-10 21:54:01 [137] fds_print_msg: GET /api/v1/count?resource=user&sn=FGT40FTK24099WAR&cluster_members=%5B%27FGT40FTK24099WAR%27%2C%20%27FGT40FTK24099VVY%27%5D&group_name=ZTP-VSN-HA-989&group_id=989 HTTP/1.1
+2025-12-10 21:54:01 [137] fds_print_msg: Host: 69.167.109.248:8686
+2025-12-10 21:54:01 [137] fds_print_msg: User-Agent: FortiGate-40F v7.4.10,build5309,251208 (interim)
+2025-12-10 21:54:01 [137] fds_print_msg: Content-Type: application/json
+2025-12-10 21:54:01 [511] fds_https_connect: http request to 69.167.109.248:8686: header=297, ext=0.
+2025-12-10 21:54:01 [245] fds_https_send: sent 297 bytes: pos=0, len=297
+2025-12-10 21:54:01 [260] fds_https_send: sent the entire request to server: 69.167.109.248:8686
+2025-12-10 21:54:01 [296] fds_https_recv: read 314 bytes: pos=314, buf_len=8192
+2025-12-10 21:54:01 [318] fds_https_recv: received the header from server: 69.167.109.248:8686, [HTTP/1.1 403 FORBIDDEN
+Server: nginx
+Date: Thu, 11 Dec 2025 05:54:01 GMT
+Content-Type: application/json
+Content-Length: 164
+Connection: close]
+2025-12-10 21:54:01 [328] fds_https_recv: response code is 403: [HTTP/1.1 403 FORBIDDEN
+Server: nginx
+Date: Thu, 11 Dec 2025 05:54:01 GMT
+Content-Type: application/json
+Content-Length: 164
+Connection: close]
+2025-12-10 21:54:01 [667] fds_https_stop_server: 69.167.109.248:8686
+2025-12-10 21:54:01 [212] __ssl_data_ctx_free: Done
+2025-12-10 21:54:01 [1123] ssl_free: Done
+2025-12-10 21:54:01 [204] __ssl_cert_ctx_free: Done
+2025-12-10 21:54:01 [1133] ssl_ctx_free: Done
+2025-12-10 21:54:01 [1114] ssl_disconnect: Shutdown
+2025-12-10 21:54:01 [333] fds_svr_default_on_response: server-ftc handles cmd-33
+2025-12-10 21:54:01 [95] ftc_res: FortiToken-Cloud internal error
+2025-12-10 21:54:01 [667] fds_https_stop_server: 69.167.109.248:8686
+2025-12-10 21:54:01 [471] fds_free_tsk: cmd=33; req.noreply=0
+2025-12-10 21:54:01 [527] fds_send_reply: Sending 0 bytes data.
+2025-12-10 21:54:14 ftm_cfg_provision_token[416]:provision token: FTKMOB5CA3C29179
+2025-12-10 21:54:14 ftm_fc_provision_token[847]:Provision token:FTKMOB5CA3C29179
+2025-12-10 21:54:14 ftm_fc_comm_connect[66]:ftm TCPS connected.
+2025-12-10 21:54:14 __get_json_cluster_obj[183]:vSN: FGT40FHA25099UXR, first member SN: FGT40FTK24099VVYFGT40FTK24099WAR, has_vsn: 1
+2025-12-10 21:54:14 __get_json_cluster_obj[188]:members 0 SN of total count:2: FGT40FTK24099VVYFGT40FTK24099WAR
+2025-12-10 21:54:14 __get_json_cluster_obj[188]:members 1 SN of total count:2: FGT40FTK24099WAR
+2025-12-10 21:54:14 ftm_fc_command[634]:{ "d": { "__type": "SoftToken.ProvisionRequest", "__version": "4", "__device_version": "7.0", "__device_build": "5309", "serial_number": "FGT40FHA25099UXR", "__clustered_sns": [ { "sn": "FGT40FHA25099UXR" } ], "tokens": [ { "token": "FTKMOB5CA3C29179", "seed": "FC8CEE4B56D93C40D590ACBB958840AF2FE76117", "code_expire": 4320, "type": "totp", "period": 60, "digits": 6 } ] } }
+2025-12-10 21:54:14 ftm_fc_comm_send_request[128]:send packet success.
+
+POST /SoftToken/Provisioning.asmx/Process HTTP/1.1
+Accept: application/json, text/javascript, */*, q=0.01
+Content-Type: application/json;charset=utf-8
+X-Requested-With: XMLHttpRequest
+Accept-Language: en-us
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)
+Host: fortinet-ca2.fortinet.com
+Content-Length: 375
+Connection: Keep-Alive
+Cache-Control: no-cache
+
+{ "d": { "__type": "SoftToken.ProvisionRequest", "__version": "4", "__device_version": "7.0", "__device_build": "5309", "serial_number": "FGT40FHA25099UXR", "__clustered_sns": [ { "sn": "FGT40FHA25099UXR" } ], "tokens": [ { "token": "FTKMOB5CA3C29179", "seed": "FC8CEE4B56D93C40D590ACBB958840AF2FE76117", "code_expire": 4320, "type": "totp", "period": 60, "digits": 6 } ] } }
+
+2025-12-10 21:54:14 ftm_fc_comm_recv_response[278]:receive packet success.
+
+{"d":{"__type":"SoftToken.ProvisionResponse","__version":"4","serial_number":"FGT40FHA25099UXR","__device_version":"7.0","__device_build":"5309","__clustered_sns":[{"sn":"FGT40FHA25099UXR","error":null}],"tokens":[{"token":"FTKMOB5CA3C29179","license":"EFTM025131062955","token_activation_code":"EEIAI6ZLEYIRKOYV","qr_code":"iVBORw0KGgoAAAANSUhEUgAAAI4AAACOAQAAAADPhg2lAAAAwElEQVR4Ac2V0Q2DIQiETRzAkVzdkRyAhHKgbfX9iMQ0+PXhP/GEonfII6ggetVRJ7LKR9U+PDs2s1uagSY28Qs1aUiHJqPMM3qhpeldexpaZnIdp79YKCIUHG+IhgQKirh9lwg6KnCS7oSPFMb1EpufrDVkIPPTsGUidIugop99v1dLRstM8cdhXxaKB4NCO01AkaHEPlE0Ae3GtzpRFpI2bB0iyCjoLjQZxY36saGDj8JM1hcwMtvfOKGhO95AH2sw5qKf9T6VAAAAAElFTkSuQmCC","code_expire":4320,"error":null}],"result":2,"error":null}}
+
+2025-12-10 21:54:14 ftm_fc_save_qr_image[138]:Create an QR code image /data2/tmp/ftm_qr_FTKMOB5CA3C29179.png
+2025-12-10 21:54:14 ftm_cfg_update_token_provision[720]:Set token FTKMOB5CA3C29179 to provisioning
+2025-12-10 21:54:14 ftm_cfg_send_token_activation_code[345]:sent activation code: EEIAI6ZLEYIRKOYV to ljiahao@fortinet.com
+2025-12-10 21:54:17 [3551] fds_handle_request: Received cmd 116 from pid-29694, len 0
+2025-12-10 21:54:17 [527] fds_send_reply: Sending 72 bytes data.
+2025-12-10 21:54:17 [3551] fds_handle_request: Received cmd 116 from pid-29694, len 0
+2025-12-10 21:54:17 [527] fds_send_reply: Sending 72 bytes data.
+2025-12-10 21:54:21 [3551] fds_handle_request: Received cmd 117 from pid-29755, len 4
+2025-12-10 21:54:21 [3351] fds_check_request: Image list was updated within 86400 secs.
+2025-12-10 21:54:21 [527] fds_send_reply: Sending 5312 bytes data.
+diagnose fortitoken debug disable
+
+FGT_HA_Slave (Interim)# diagnose debug application forticldd 0
+
+FGT_HA_Slave (Interim)# diagnose debug reset
+
+FGT_HA_Slave (Interim)# Timeout
+exit
