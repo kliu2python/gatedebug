@@ -38,7 +38,7 @@ usage_metrics = {
 # FortiGate Debug Commands Configuration
 DEBUG_MODES = {
     "authentication": {
-        "name": "认证调试 (Authentication - fnbamd)",
+        "name": "Authentication Debug (fnbamd)",
         "commands": [
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
@@ -50,7 +50,7 @@ DEBUG_MODES = {
         ]
     },
     "fortitoken": {
-        "name": "FortiToken调试",
+        "name": "FortiToken Debug",
         "commands": [
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
@@ -65,7 +65,7 @@ DEBUG_MODES = {
         ]
     },
     "fortitoken_cloud": {
-        "name": "FortiToken Cloud调试",
+        "name": "FortiToken Cloud Debug",
         "commands": [
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
@@ -77,7 +77,7 @@ DEBUG_MODES = {
         ]
     },
     "ssl_vpn": {
-        "name": "SSL VPN调试",
+        "name": "SSL VPN Debug",
         "commands": [
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
@@ -89,7 +89,7 @@ DEBUG_MODES = {
         ]
     },
     "ipsec_vpn": {
-        "name": "IPsec VPN调试",
+        "name": "IPsec VPN Debug",
         "commands": [
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
@@ -102,7 +102,7 @@ DEBUG_MODES = {
         ]
     },
     "routing_ospf": {
-        "name": "路由调试 - OSPF",
+        "name": "Routing Debug - OSPF",
         "commands": [
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
@@ -115,7 +115,7 @@ DEBUG_MODES = {
         ]
     },
     "routing_bgp": {
-        "name": "路由调试 - BGP",
+        "name": "Routing Debug - BGP",
         "commands": [
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
@@ -128,7 +128,7 @@ DEBUG_MODES = {
         ]
     },
     "packet_flow": {
-        "name": "数据包流调试 (Debug Flow)",
+        "name": "Packet Flow Debug",
         "commands": [
             "diagnose debug reset",
             "diagnose debug flow filter clear",
@@ -145,7 +145,7 @@ DEBUG_MODES = {
         ]
     },
     "wad_proxy": {
-        "name": "WAD代理调试",
+        "name": "WAD Proxy Debug",
         "commands": [
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
@@ -157,7 +157,7 @@ DEBUG_MODES = {
         ]
     },
     "ips": {
-        "name": "IPS引擎调试",
+        "name": "IPS Engine Debug",
         "commands": [
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
@@ -169,7 +169,7 @@ DEBUG_MODES = {
         ]
     },
     "ha": {
-        "name": "高可用性 (HA) 调试",
+        "name": "High Availability (HA) Debug",
         "commands": [
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
@@ -183,7 +183,7 @@ DEBUG_MODES = {
         ]
     },
     "dns": {
-        "name": "DNS调试",
+        "name": "DNS Debug",
         "commands": [
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
@@ -195,7 +195,7 @@ DEBUG_MODES = {
         ]
     },
     "dhcp": {
-        "name": "DHCP服务器调试",
+        "name": "DHCP Server Debug",
         "commands": [
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
@@ -207,7 +207,7 @@ DEBUG_MODES = {
         ]
     },
     "fortilink": {
-        "name": "FortiLink调试",
+        "name": "FortiLink Debug",
         "commands": [
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
@@ -219,7 +219,7 @@ DEBUG_MODES = {
         ]
     },
     "sdwan": {
-        "name": "SD-WAN调试",
+        "name": "SD-WAN Debug",
         "commands": [
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
@@ -231,7 +231,7 @@ DEBUG_MODES = {
         ]
     },
     "ztna": {
-        "name": "ZTNA调试",
+        "name": "ZTNA Debug",
         "commands": [
             "diagnose debug reset",
             "diagnose debug console timestamp enable",
@@ -246,7 +246,7 @@ DEBUG_MODES = {
 
 
 class FortiGateConnection:
-    """FortiGate连接管理类"""
+    """FortiGate connection manager"""
     
     def __init__(self, host, port, username, password, connection_type='ssh'):
         self.host = host
@@ -262,7 +262,7 @@ class FortiGateConnection:
         self.current_output_id = None
         
     def connect_ssh(self):
-        """SSH连接"""
+        """Establish an SSH connection"""
         try:
             logger.debug("Initializing SSH client for %s:%s", self.host, self.port)
             self.client = paramiko.SSHClient()
@@ -278,33 +278,33 @@ class FortiGateConnection:
             )
             self.shell = self.client.invoke_shell(width=200, height=50)
             time.sleep(1)
-            # 清空初始输出
+            # Clear any initial channel output
             if self.shell.recv_ready():
                 logger.debug("Clearing initial SSH channel output for %s", self.host)
                 self.shell.recv(65535)
-            return True, "SSH连接成功"
+            return True, "SSH connection successful"
         except Exception as e:
             logger.exception("SSH connection failed for %s:%s", self.host, self.port)
-            return False, f"SSH连接失败: {str(e)}"
-    
+            return False, f"SSH connection failed: {str(e)}"
+
     def connect_telnet(self):
-        """Telnet连接"""
+        """Establish a Telnet connection"""
         try:
             logger.debug("Initializing Telnet client for %s:%s", self.host, self.port)
             self.client = telnetlib.Telnet(self.host, self.port, timeout=10)
-            # 等待登录提示
+            # Wait for login prompts
             self.client.read_until(b"login: ", timeout=5)
             self.client.write(self.username.encode('ascii') + b"\n")
             self.client.read_until(b"Password: ", timeout=5)
             self.client.write(self.password.encode('ascii') + b"\n")
             time.sleep(1)
-            return True, "Telnet连接成功"
+            return True, "Telnet connection successful"
         except Exception as e:
             logger.exception("Telnet connection failed for %s:%s", self.host, self.port)
-            return False, f"Telnet连接失败: {str(e)}"
-    
+            return False, f"Telnet connection failed: {str(e)}"
+
     def connect(self):
-        """建立连接"""
+        """Create a connection using the configured protocol"""
         if self.connection_type == 'ssh':
             logger.info("Attempting SSH connection to %s:%s", self.host, self.port)
             return self.connect_ssh()
@@ -312,10 +312,10 @@ class FortiGateConnection:
             logger.info("Attempting Telnet connection to %s:%s", self.host, self.port)
             return self.connect_telnet()
         else:
-            return False, "不支持的连接类型"
-    
+            return False, "Unsupported connection type"
+
     def send_command(self, command, wait_time=1):
-        """发送命令"""
+        """Send a command over the active connection"""
         try:
             if self.connection_type == 'ssh':
                 logger.debug("Sending SSH command: %s", command)
@@ -332,14 +332,14 @@ class FortiGateConnection:
                 return self.client.read_very_eager().decode('utf-8', errors='ignore')
         except Exception as e:
             logger.exception("Command execution error on %s via %s", self.host, self.connection_type)
-            return f"命令执行错误: {str(e)}"
-    
+            return f"Command execution error: {str(e)}"
+
     def start_debug_monitoring(self, debug_mode):
-        """启动debug监控"""
+        """Start debug monitoring for the selected mode"""
         if debug_mode not in DEBUG_MODES:
-            return False, "无效的debug模式"
-        
-        # 发送debug启动命令
+            return False, "Invalid debug mode"
+
+        # Send debug start commands
         mode_config = DEBUG_MODES[debug_mode]
         for cmd in mode_config['commands']:
             self.send_command(cmd, wait_time=0.5)
@@ -351,10 +351,10 @@ class FortiGateConnection:
 
         logger.info("Started debug monitoring: mode=%s session=%s", debug_mode, self.current_output_id)
 
-        return True, f"已启动 {mode_config['name']} 监控"
-    
+        return True, f"Started monitoring {mode_config['name']}"
+
     def _monitor_output(self):
-        """监控输出线程"""
+        """Background thread to collect device output"""
         while self.is_monitoring:
             try:
                 if self.connection_type == 'ssh' and self.shell.recv_ready():
@@ -376,11 +376,11 @@ class FortiGateConnection:
                 time.sleep(0.1)
             except Exception as e:
                 logger.exception("Monitoring thread error for %s", self.host)
-                self.output_buffer.append(f"监控错误: {str(e)}")
+                self.output_buffer.append(f"Monitoring error: {str(e)}")
                 break
-    
+
     def stop_debug_monitoring(self, debug_mode):
-        """停止debug监控"""
+        """Stop debug monitoring for the selected mode"""
         self.is_monitoring = False
 
         logger.info("Stopping debug monitoring: mode=%s session=%s", debug_mode, self.current_output_id)
@@ -392,20 +392,20 @@ class FortiGateConnection:
         
         if self.monitor_thread:
             self.monitor_thread.join(timeout=2)
-        
-        return True, "已停止监控"
-    
+
+        return True, "Monitoring stopped"
+
     def get_output(self):
-        """获取输出缓冲区"""
+        """Return a copy of the current output buffer"""
         output = self.output_buffer.copy()
         return output
-    
+
     def clear_output(self):
-        """清空输出缓冲区"""
+        """Clear the current output buffer"""
         self.output_buffer.clear()
-    
+
     def disconnect(self):
-        """断开连接"""
+        """Disconnect and clean up resources"""
         self.is_monitoring = False
         if self.monitor_thread:
             self.monitor_thread.join(timeout=2)
@@ -418,7 +418,7 @@ class FortiGateConnection:
 
 @app.route('/api/debug-modes', methods=['GET'])
 def get_debug_modes():
-    """获取所有可用的debug模式"""
+    """Return all available debug modes"""
     logger.debug("Fetching available debug modes")
     modes = []
     for key, value in DEBUG_MODES.items():
@@ -433,7 +433,7 @@ def get_debug_modes():
 
 @app.route('/api/connect', methods=['POST'])
 def connect_fortigate():
-    """连接到FortiGate"""
+    """Create a new FortiGate connection"""
     data = request.json
 
     logger.info("Received connection request", extra={'host': data.get('host'), 'connection_type': data.get('connection_type', 'ssh')})
@@ -445,13 +445,13 @@ def connect_fortigate():
     connection_type = data.get('connection_type', 'ssh')
     
     if not all([host, username, password]):
-        return jsonify({'success': False, 'message': '缺少必要参数'}), 400
-    
-    # 创建连接对象
+        return jsonify({'success': False, 'message': 'Missing required parameters'}), 400
+
+    # Create connection object
     session_id = f"{host}_{username}_{int(time.time())}"
     conn = FortiGateConnection(host, port, username, password, connection_type)
 
-    # 尝试连接
+    # Attempt to connect
     success, message = conn.connect()
 
     if success:
@@ -471,13 +471,13 @@ def connect_fortigate():
 
 @app.route('/api/start-debug', methods=['POST'])
 def start_debug():
-    """启动debug监控"""
+    """Start debug monitoring for a session"""
     data = request.json
     session_id = data.get('session_id')
     debug_mode = data.get('debug_mode')
 
     if session_id not in active_sessions:
-        return jsonify({'success': False, 'message': '无效的会话ID'}), 400
+        return jsonify({'success': False, 'message': 'Invalid session ID'}), 400
 
     conn = active_sessions[session_id]
     output_id = f"{session_id}_{debug_mode}_{int(time.time())}"
@@ -508,14 +508,14 @@ def start_debug():
 
 @app.route('/api/stop-debug', methods=['POST'])
 def stop_debug():
-    """停止debug监控"""
+    """Stop debug monitoring for a session"""
     data = request.json
     session_id = data.get('session_id')
     output_id = data.get('output_id')
     debug_mode = data.get('debug_mode')
 
     if session_id not in active_sessions:
-        return jsonify({'success': False, 'message': '无效的会话ID'}), 400
+        return jsonify({'success': False, 'message': 'Invalid session ID'}), 400
 
     conn = active_sessions[session_id]
     logger.info("Stopping debug", extra={'session_id': session_id, 'debug_mode': debug_mode, 'output_id': output_id})
@@ -523,7 +523,7 @@ def stop_debug():
 
     conn.current_output_id = None
 
-    # 保存最终输出
+    # Save final output
     if output_id and output_id in debug_outputs:
         final_output = conn.get_output()
         debug_outputs[output_id]['output'] = final_output
@@ -537,12 +537,12 @@ def stop_debug():
 
 @app.route('/api/get-output', methods=['POST'])
 def get_output():
-    """获取debug输出"""
+    """Return debug output for a session"""
     data = request.json
     session_id = data.get('session_id')
 
     if session_id not in active_sessions:
-        return jsonify({'success': False, 'message': '无效的会话ID'}), 400
+        return jsonify({'success': False, 'message': 'Invalid session ID'}), 400
 
     conn = active_sessions[session_id]
     output = conn.get_output()
@@ -557,7 +557,7 @@ def get_output():
 
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
-    """获取基础使用统计信息"""
+    """Return basic usage statistics"""
     logger.debug(
         "Stats requested",
         extra={
@@ -576,12 +576,12 @@ def get_stats():
 
 @app.route('/api/download-output', methods=['POST'])
 def download_output():
-    """下载debug输出"""
+    """Download debug output for a completed session"""
     data = request.json
     output_id = data.get('output_id')
 
     if output_id not in debug_outputs:
-        return jsonify({'success': False, 'message': '无效的输出ID'}), 400
+        return jsonify({'success': False, 'message': 'Invalid output ID'}), 400
 
     output_data = debug_outputs[output_id]
     logger.info(
@@ -594,7 +594,7 @@ def download_output():
         }
     )
     
-    # 生成文件内容
+    # Build file content
     content = []
     content.append(f"FortiGate Debug Output")
     content.append(f"=" * 80)
@@ -607,7 +607,7 @@ def download_output():
     
     file_content = "\n".join(content)
     
-    # 创建文件
+    # Create the downloadable file
     filename = f"fortigate_debug_{output_data['debug_mode']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
     
     return send_file(
@@ -620,7 +620,7 @@ def download_output():
 
 @app.route('/api/disconnect', methods=['POST'])
 def disconnect():
-    """断开连接"""
+    """Disconnect an active FortiGate session"""
     data = request.json
     session_id = data.get('session_id')
 
@@ -629,23 +629,23 @@ def disconnect():
         conn.disconnect()
         del active_sessions[session_id]
         logger.info("Disconnected session", extra={'session_id': session_id})
-        return jsonify({'success': True, 'message': '已断开连接'})
-    
-    return jsonify({'success': False, 'message': '无效的会话ID'}), 400
+        return jsonify({'success': True, 'message': 'Disconnected successfully'})
+
+    return jsonify({'success': False, 'message': 'Invalid session ID'}), 400
 
 
 @app.route('/api/execute-command', methods=['POST'])
 def execute_command():
-    """执行自定义命令"""
+    """Execute a custom CLI command"""
     data = request.json
     session_id = data.get('session_id')
     command = data.get('command')
     
     if session_id not in active_sessions:
-        return jsonify({'success': False, 'message': '无效的会话ID'}), 400
+        return jsonify({'success': False, 'message': 'Invalid session ID'}), 400
 
     if not command:
-        return jsonify({'success': False, 'message': '命令不能为空'}), 400
+        return jsonify({'success': False, 'message': 'Command cannot be empty'}), 400
 
     conn = active_sessions[session_id]
     logger.info("Executing custom command", extra={'session_id': session_id, 'command': command})
