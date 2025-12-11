@@ -67,6 +67,14 @@
             const [message, setMessage] = useState({ type: '', text: '' });
             const [autoScroll, setAutoScroll] = useState(true);
             const [stats, setStats] = useState({ total_sessions: 0, unique_users: 0, active_sessions: 0 });
+            const [loading, setLoading] = useState({
+                connect: false,
+                start: false,
+                stop: false,
+                download: false,
+                disconnect: false,
+                clear: false
+            });
             const outputRef = useRef(null);
 
             // Load available debug modes
@@ -146,6 +154,7 @@
             };
 
             const handleConnect = async () => {
+                setLoading(prev => ({ ...prev, connect: true }));
                 try {
                     const response = await fetch(`${API_BASE_URL}/connect`, {
                         method: 'POST',
@@ -165,14 +174,17 @@
                     }
                 } catch (error) {
                     showMessage('error', 'Connection failed: ' + error.message);
+                } finally {
+                    setLoading(prev => ({ ...prev, connect: false }));
                 }
             };
 
             const handleDisconnect = async () => {
+                setLoading(prev => ({ ...prev, disconnect: true }));
                 if (isMonitoring) {
                     await handleStopDebug();
                 }
-                
+
                 try {
                     const response = await fetch(`${API_BASE_URL}/disconnect`, {
                         method: 'POST',
@@ -191,6 +203,8 @@
                     }
                 } catch (error) {
                     showMessage('error', 'Failed to disconnect: ' + error.message);
+                } finally {
+                    setLoading(prev => ({ ...prev, disconnect: false }));
                 }
             };
 
@@ -199,7 +213,8 @@
                     showMessage('error', 'Please select a debug mode');
                     return;
                 }
-                
+
+                setLoading(prev => ({ ...prev, start: true }));
                 try {
                     const response = await fetch(`${API_BASE_URL}/start-debug`, {
                         method: 'POST',
@@ -223,10 +238,13 @@
                     }
                 } catch (error) {
                     showMessage('error', 'Failed to start debug: ' + error.message);
+                } finally {
+                    setLoading(prev => ({ ...prev, start: false }));
                 }
             };
 
             const handleStopDebug = async () => {
+                setLoading(prev => ({ ...prev, stop: true }));
                 try {
                     const response = await fetch(`${API_BASE_URL}/stop-debug`, {
                         method: 'POST',
@@ -247,6 +265,8 @@
                     }
                 } catch (error) {
                     showMessage('error', 'Failed to stop debug: ' + error.message);
+                } finally {
+                    setLoading(prev => ({ ...prev, stop: false }));
                 }
             };
 
@@ -255,7 +275,8 @@
                     showMessage('error', 'No output available to download');
                     return;
                 }
-                
+
+                setLoading(prev => ({ ...prev, download: true }));
                 try {
                     const response = await fetch(`${API_BASE_URL}/download-output`, {
                         method: 'POST',
@@ -281,11 +302,15 @@
                     }
                 } catch (error) {
                     showMessage('error', 'Download failed: ' + error.message);
+                } finally {
+                    setLoading(prev => ({ ...prev, download: false }));
                 }
             };
 
             const handleClearOutput = () => {
+                setLoading(prev => ({ ...prev, clear: true }));
                 setDebugOutput([]);
+                setTimeout(() => setLoading(prev => ({ ...prev, clear: false })), 300);
             };
 
             return (
@@ -408,8 +433,9 @@
                                         <button
                                             className="w-full bg-white text-indigo-600 font-bold py-3 px-6 rounded-lg hover:bg-gray-100 transition duration-200 mt-6"
                                             onClick={handleConnect}
+                                            disabled={loading.connect}
                                         >
-                                            Connect
+                                            {loading.connect ? 'Connecting...' : 'Connect'}
                                         </button>
                                     </div>
                                 </div>
@@ -438,32 +464,34 @@
                                                 <button
                                                     className="w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition duration-200"
                                                     onClick={handleStartDebug}
-                                                    disabled={!selectedMode}
+                                                    disabled={!selectedMode || loading.start}
                                                 >
-                                                    Start Monitoring
+                                                    {loading.start ? 'Starting...' : 'Start Monitoring'}
                                                 </button>
                                             ) : (
                                                 <button
                                                     className="w-full bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition duration-200"
                                                     onClick={handleStopDebug}
+                                                    disabled={loading.stop}
                                                 >
-                                                    Stop Monitoring
+                                                    {loading.stop ? 'Stopping...' : 'Stop Monitoring'}
                                                 </button>
                                             )}
-                                            
+
                                             <button
                                                 className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-200"
                                                 onClick={handleDownload}
-                                                disabled={!outputId || debugOutput.length === 0}
+                                                disabled={!outputId || debugOutput.length === 0 || loading.download}
                                             >
-                                                Download Output
+                                                {loading.download ? 'Downloading...' : 'Download Output'}
                                             </button>
 
                                             <button
                                                 className="w-full bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition duration-200"
                                                 onClick={handleDisconnect}
+                                                disabled={loading.disconnect}
                                             >
-                                                Disconnect
+                                                {loading.disconnect ? 'Disconnecting...' : 'Disconnect'}
                                             </button>
                                         </div>
                                     </div>
@@ -484,8 +512,9 @@
                                             <button
                                                 className="w-full bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-700 transition duration-200"
                                                 onClick={handleClearOutput}
+                                                disabled={loading.clear}
                                             >
-                                                Clear Output
+                                                {loading.clear ? 'Clearing...' : 'Clear Output'}
                                             </button>
                                         </div>
                                     </div>
