@@ -1,119 +1,119 @@
 # FortiGate Debug Monitor Web Application
 
-一个强大的 Web 应用程序，用于远程连接 FortiGate 防火墙并监控各种 debug 模式输出。
+A web application for remotely connecting to FortiGate firewalls and monitoring output from common debug modes.
 
-## 功能特点
+## Features
 
-### 连接方式
-- ✅ **SSH连接** - 安全的SSH协议连接
-- ✅ **Telnet连接** - 支持传统Telnet连接
-- ✅ **Console连接** - 可扩展支持串口console
+### Connection Methods
+- ✅ **SSH** – Encrypted SSH connections
+- ✅ **Telnet** – Traditional Telnet support
+- ✅ **Console** – Extensible for serial console support
 
-### 支持的Debug模式
+### Supported Debug Modes
 
-1. **认证调试 (fnbamd)** - 用于RADIUS、LDAP、TACACS+等认证问题
-2. **FortiToken调试** - 硬件FortiToken问题诊断
-3. **FortiToken Cloud调试** - FortiToken Cloud集成问题
-4. **SSL VPN调试** - SSL VPN连接和认证问题
-5. **IPsec VPN调试** - IPsec隧道建立和加密问题
-6. **OSPF路由调试** - OSPF路由协议问题
-7. **BGP路由调试** - BGP路由协议问题
-8. **数据包流调试 (Debug Flow)** - 跟踪数据包通过防火墙的路径
-9. **WAD代理调试** - Web应用防火墙和代理问题
-10. **IPS引擎调试** - 入侵防御系统问题
-11. **HA调试** - 高可用性集群问题
-12. **DNS调试** - DNS解析和转发问题
-13. **DHCP调试** - DHCP服务器问题
-14. **FortiLink调试** - FortiSwitch集成问题
-15. **SD-WAN调试** - SD-WAN路径选择问题
-16. **ZTNA调试** - Zero Trust Network Access问题
+1. **Authentication Debug (fnbamd)** – RADIUS, LDAP, and TACACS+ authentication issues
+2. **FortiToken Debug** – Hardware FortiToken troubleshooting
+3. **FortiToken Cloud Debug** – FortiToken Cloud integration issues
+4. **SSL VPN Debug** – SSL VPN connectivity and authentication issues
+5. **IPsec VPN Debug** – IPsec tunnel establishment and encryption problems
+6. **OSPF Routing Debug** – OSPF routing protocol issues
+7. **BGP Routing Debug** – BGP routing protocol issues
+8. **Packet Flow Debug** – Trace packet paths through the firewall
+9. **WAD Proxy Debug** – Web application firewall and proxy issues
+10. **IPS Engine Debug** – Intrusion Prevention System issues
+11. **HA Debug** – High Availability cluster issues
+12. **DNS Debug** – DNS resolution and forwarding issues
+13. **DHCP Debug** – DHCP server issues
+14. **FortiLink Debug** – FortiSwitch integration issues
+15. **SD-WAN Debug** – SD-WAN path selection issues
+16. **ZTNA Debug** – Zero Trust Network Access issues
 
-### 核心功能
+### Core Capabilities
 
-- 🔌 **实时连接监控** - 实时显示连接状态
-- 📊 **实时debug输出** - 每秒自动刷新debug信息
-- 💾 **输出导出** - 将debug输出保存为文本文件
-- 🎯 **自动滚动** - 可选择是否自动滚动到最新输出
-- 📝 **时间戳** - 每行输出包含精确时间戳
-- 🧹 **清空输出** - 随时清空当前显示的输出
-- 📈 **统计信息** - 显示输出行数和监控状态
+- 🔌 **Real-time connection monitoring** – Display connection status
+- 📊 **Live debug output** – Refresh debug information every second
+- 💾 **Output export** – Save debug output as a text file
+- 🎯 **Auto-scroll** – Optional auto-scroll to the latest output
+- 📝 **Timestamps** – Each line includes a timestamp
+- 🧹 **Clear output** – Reset the displayed output at any time
+- 📈 **Statistics** – Show line counts and monitoring status
 
-## 系统架构
+## Architecture
 
-### 后端 (Python/Flask)
-- **app.py** - Flask REST API服务器
-  - 处理SSH/Telnet连接
-  - 执行FortiGate命令
-  - 实时捕获debug输出
-  - 提供文件下载功能
+### Backend (Python/Flask)
+- **app.py** – Flask REST API server
+  - Handles SSH/Telnet connections
+  - Executes FortiGate commands
+  - Collects debug output in real time
+  - Provides download support
 
-### 前端 (React)
-- **index.html** - 单页面React应用
-  - 现代化UI界面
-  - 实时数据更新
-  - 响应式设计
-  - Tailwind CSS样式
+### Frontend (React)
+- **index.html** – Single-page React application
+  - Modern UI
+  - Real-time updates
+  - Responsive design
+  - Tailwind CSS styling
 
-## 安装和使用
+## Installation and Usage
 
-### 1. 安装依赖
+### 1. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. 启动后端服务器
+### 2. Start the backend server
 
 ```bash
 python app.py
 ```
 
-后端服务器将在 `http://localhost:5000` 运行
+The backend runs at `http://localhost:5000`.
 
-### 3. 打开前端界面
+### 3. Open the frontend
 
-使用浏览器打开 `index.html` 文件，或者使用简单的HTTP服务器:
+Open `index.html` directly in your browser or host it with a simple HTTP server:
 
 ```bash
 # Python 3
 python -m http.server 8000
 ```
 
-然后访问 `http://localhost:8000`
+Then visit `http://localhost:8000`.
 
-### 4. 连接FortiGate
+### 4. Connect to FortiGate
 
-1. 在连接表单中填写:
-   - **主机地址**: FortiGate的IP地址
-   - **端口**: SSH端口(默认22)或Telnet端口(默认23)
-   - **连接类型**: 选择SSH或Telnet
-   - **用户名**: FortiGate管理员用户名
-   - **密码**: 对应的密码
+1. Fill in the connection form:
+   - **Host Address**: FortiGate IP address
+   - **Port**: SSH port (default 22) or Telnet port (default 23)
+   - **Connection Type**: SSH or Telnet
+   - **Username**: FortiGate admin username
+   - **Password**: Corresponding password
 
-2. 点击"连接"按钮
+2. Click **Connect**
 
-### 5. 开始Debug监控
+### 5. Start Debug Monitoring
 
-1. 从下拉菜单选择要监控的debug模式
-2. 点击"开始监控"按钮
-3. 观察实时输出
-4. 完成后点击"停止监控"
-5. 可以点击"下载输出"保存调试信息
+1. Choose a debug mode from the dropdown
+2. Click **Start Monitoring**
+3. Observe the live output
+4. Click **Stop Monitoring** when done
+5. Click **Download Output** to save the logs
 
-## API接口文档
+## API Reference
 
-### 获取Debug模式列表
+### List Debug Modes
 ```
 GET /api/debug-modes
 ```
 
-响应示例:
+Response example:
 ```json
 {
   "modes": [
     {
       "id": "authentication",
-      "name": "认证调试 (Authentication - fnbamd)",
+      "name": "Authentication Debug (fnbamd)",
       "start_commands": [...],
       "stop_commands": [...]
     },
@@ -122,7 +122,7 @@ GET /api/debug-modes
 }
 ```
 
-### 连接FortiGate
+### Connect to FortiGate
 ```
 POST /api/connect
 Content-Type: application/json
@@ -136,7 +136,7 @@ Content-Type: application/json
 }
 ```
 
-### 开始Debug监控
+### Start Debug Monitoring
 ```
 POST /api/start-debug
 Content-Type: application/json
@@ -147,7 +147,7 @@ Content-Type: application/json
 }
 ```
 
-### 停止Debug监控
+### Stop Debug Monitoring
 ```
 POST /api/stop-debug
 Content-Type: application/json
@@ -159,7 +159,7 @@ Content-Type: application/json
 }
 ```
 
-### 获取Debug输出
+### Get Debug Output
 ```
 POST /api/get-output
 Content-Type: application/json
@@ -169,7 +169,7 @@ Content-Type: application/json
 }
 ```
 
-### 下载输出文件
+### Download Output File
 ```
 POST /api/download-output
 Content-Type: application/json
@@ -179,7 +179,7 @@ Content-Type: application/json
 }
 ```
 
-### 断开连接
+### Disconnect
 ```
 POST /api/disconnect
 Content-Type: application/json
@@ -189,138 +189,134 @@ Content-Type: application/json
 }
 ```
 
-## FortiGate命令参考
+## FortiGate Command Reference
 
-### 认证调试 (fnbamd)
+### Authentication Debug (fnbamd)
 ```bash
 diagnose debug reset
 diagnose debug console timestamp enable
 diagnose debug application fnbamd -1
 diagnose debug enable
 
-# 停止
+# Stop
 diagnose debug application fnbamd 0
 diagnose debug reset
 ```
 
-### FortiToken调试
+### FortiToken Debug
 ```bash
 diagnose debug application forticldd 255
 diagnose fortitoken debug enable
 
-# 查看FortiToken状态
+# Check FortiToken status
 diagnose fortitoken info
 
-# 停止
+# Stop
 diagnose fortitoken debug disable
 diagnose debug application forticldd 0
 ```
 
-### SSL VPN调试
+### SSL VPN Debug
 ```bash
 diagnose debug application sslvpn -1
 diagnose debug enable
 
-# 停止
+# Stop
 diagnose debug application sslvpn 0
 diagnose debug reset
 ```
 
-### IPsec VPN调试
+### IPsec VPN Debug
 ```bash
 diagnose vpn ike log-filter clear
 diagnose debug application ike -1
 diagnose debug enable
 
-# 停止
+# Stop
 diagnose debug application ike 0
 diagnose debug reset
 ```
 
-### 数据包流调试
+### Packet Flow Debug
 ```bash
 diagnose debug flow filter clear
-diagnose debug flow filter saddr <源IP>
-diagnose debug flow filter daddr <目标IP>
-diagnose debug flow filter port <端口>
+diagnose debug flow filter saddr <source-ip>
+diagnose debug flow filter daddr <destination-ip>
+diagnose debug flow filter port <port>
 diagnose debug flow show console enable
 diagnose debug flow show function-name enable
 diagnose debug console timestamp enable
 diagnose debug enable
 diagnose debug flow trace start 100
 
-# 停止
+# Stop
 diagnose debug flow trace stop
 diagnose debug disable
 diagnose debug reset
 ```
 
-## 安全建议
+## Security Recommendations
 
-1. **不要在生产环境直接使用** - 这是一个调试工具
-2. **使用SSH而非Telnet** - SSH提供加密连接
-3. **限制访问IP** - 只允许特定IP访问FortiGate管理接口
-4. **使用专用调试账号** - 创建具有只读权限的专用账号
-5. **及时停止Debug** - Debug会产生大量日志,影响性能
-6. **保护敏感信息** - 下载的debug输出可能包含敏感信息
+1. **Avoid production use for long periods** – Debugging generates heavy logs
+2. **Prefer SSH over Telnet** – SSH provides encryption
+3. **Restrict management access** – Limit FortiGate management interface to trusted IPs
+4. **Use a dedicated debug account** – Grant minimal permissions
+5. **Stop debug sessions promptly** – Debugging impacts performance
+6. **Protect sensitive data** – Downloaded output may contain confidential information
 
-## 故障排除
+## Troubleshooting
 
-### 连接失败
-- 检查FortiGate IP地址和端口
-- 确认FortiGate防火墙规则允许SSH/Telnet访问
-- 验证用户名和密码正确
-- 检查网络连接
+### Connection Failed
+- Verify FortiGate IP and port
+- Ensure firewall rules allow SSH/Telnet access
+- Confirm username and password
+- Check network connectivity
 
-### 无Debug输出
-- 确认已选择正确的debug模式
-- 检查是否有相关流量触发debug
-- 某些debug模式需要特定的触发条件
-- 查看FortiGate系统负载是否过高
+### No Debug Output
+- Confirm the correct debug mode is selected
+- Trigger relevant traffic or events
+- Some modes require specific triggers
+- Verify FortiGate system load is healthy
 
-### 输出不完整
-- 增加output buffer大小
-- 减少debug详细级别
-- 使用更具体的过滤器
+### Output Incomplete
+- Increase the output buffer
+- Reduce debug verbosity
+- Apply more specific filters
 
-## 扩展功能建议
+## Future Enhancements
 
-1. **添加Console串口连接支持**
-2. **支持多个同时连接**
-3. **添加debug输出搜索功能**
-4. **支持debug输出语法高亮**
-5. **添加常用debug命令模板**
-6. **支持保存连接配置**
-7. **添加导出为CSV格式**
-8. **集成日志分析工具**
+1. Add console (serial) connection support
+2. Allow multiple simultaneous connections
+3. Add debug output search
+4. Support syntax highlighting for output
+5. Provide common debug command templates
+6. Save connection presets
+7. Export to CSV
+8. Integrate log analysis tools
 
-## 技术栈
+## Tech Stack
 
-- **后端**: Python 3.8+, Flask, Paramiko
-- **前端**: React 18, Tailwind CSS
-- **连接**: SSH (Paramiko), Telnet (telnetlib)
+- **Backend**: Python 3.8+, Flask, Paramiko
+- **Frontend**: React 18, Tailwind CSS
+- **Connectivity**: SSH (Paramiko), Telnet (telnetlib)
 
-## 许可证
+## License
 
 MIT License
 
-## 作者
+## Contributing
 
-FortiGate Debug Monitor Tool
+Issues and pull requests are welcome!
 
-## 贡献
-
-欢迎提交Issue和Pull Request!
-
-## 更新日志
+## Changelog
 
 ### v1.0.0 (2024)
-- 初始版本发布
-- 支持SSH和Telnet连接
-- 实现16种常用debug模式
-- 实时输出监控
-- 文件导出功能
+- Initial release
+- SSH and Telnet support
+- 16 debug modes implemented
+- Real-time output monitoring
+- File export functionality
 
 ---
 
-**注意**: 此工具仅用于诊断和故障排除目的。请勿在生产环境中长时间运行debug,因为会产生大量日志并可能影响FortiGate性能。
+**Note**: This tool is intended for diagnostics and troubleshooting. Avoid running debug sessions in production for extended periods because logging volume can impact FortiGate performance.
