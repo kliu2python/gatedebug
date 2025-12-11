@@ -12,8 +12,15 @@ import io
 import threading
 import time
 import json
+import logging
 from datetime import datetime
 import os
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s [%(levelname)s] %(name)s - %(message)s'
+)
+logger = logging.getLogger("fortigate_debug")
 
 app = Flask(__name__)
 CORS(app)
@@ -256,6 +263,7 @@ class FortiGateConnection:
     def connect_ssh(self):
         """SSH连接"""
         try:
+            logger.debug("Initializing SSH client for %s:%s", self.host, self.port)
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             self.client.connect(
@@ -271,14 +279,17 @@ class FortiGateConnection:
             time.sleep(1)
             # 清空初始输出
             if self.shell.recv_ready():
+                logger.debug("Clearing initial SSH channel output for %s", self.host)
                 self.shell.recv(65535)
             return True, "SSH连接成功"
         except Exception as e:
+            logger.exception("SSH connection failed for %s:%s", self.host, self.port)
             return False, f"SSH连接失败: {str(e)}"
     
     def connect_telnet(self):
         """Telnet连接"""
         try:
+            logger.debug("Initializing Telnet client for %s:%s", self.host, self.port)
             self.client = telnetlib.Telnet(self.host, self.port, timeout=10)
             # 等待登录提示
             self.client.read_until(b"login: ", timeout=5)
@@ -288,13 +299,16 @@ class FortiGateConnection:
             time.sleep(1)
             return True, "Telnet连接成功"
         except Exception as e:
+            logger.exception("Telnet connection failed for %s:%s", self.host, self.port)
             return False, f"Telnet连接失败: {str(e)}"
     
     def connect(self):
         """建立连接"""
         if self.connection_type == 'ssh':
+            logger.info("Attempting SSH connection to %s:%s", self.host, self.port)
             return self.connect_ssh()
         elif self.connection_type == 'telnet':
+            logger.info("Attempting Telnet connection to %s:%s", self.host, self.port)
             return self.connect_telnet()
         else:
             return False, "不支持的连接类型"
@@ -303,6 +317,7 @@ class FortiGateConnection:
         """发送命令"""
         try:
             if self.connection_type == 'ssh':
+                logger.debug("Sending SSH command: %s", command)
                 self.shell.send(command + "\n")
                 time.sleep(wait_time)
                 output = ""
@@ -310,10 +325,12 @@ class FortiGateConnection:
                     output += self.shell.recv(65535).decode('utf-8', errors='ignore')
                 return output
             elif self.connection_type == 'telnet':
+                logger.debug("Sending Telnet command: %s", command)
                 self.client.write(command.encode('ascii') + b"\n")
                 time.sleep(wait_time)
                 return self.client.read_very_eager().decode('utf-8', errors='ignore')
         except Exception as e:
+            logger.exception("Command execution error on %s via %s", self.host, self.connection_type)
             return f"命令执行错误: {str(e)}"
     
     def start_debug_monitoring(self, debug_mode):
@@ -330,7 +347,9 @@ class FortiGateConnection:
         self.monitor_thread = threading.Thread(target=self._monitor_output)
         self.monitor_thread.daemon = True
         self.monitor_thread.start()
-        
+
+        logger.info("Started debug monitoring: mode=%s session=%s", debug_mode, self.current_output_id)
+
         return True, f"已启动 {mode_config['name']} 监控"
     
     def _monitor_output(self):
@@ -355,13 +374,16 @@ class FortiGateConnection:
                             debug_outputs[self.current_output_id]['output'].append(formatted)
                 time.sleep(0.1)
             except Exception as e:
+                logger.exception("Monitoring thread error for %s", self.host)
                 self.output_buffer.append(f"监控错误: {str(e)}")
                 break
     
     def stop_debug_monitoring(self, debug_mode):
         """停止debug监控"""
         self.is_monitoring = False
-        
+
+        logger.info("Stopping debug monitoring: mode=%s session=%s", debug_mode, self.current_output_id)
+
         if debug_mode in DEBUG_MODES:
             mode_config = DEBUG_MODES[debug_mode]
             for cmd in mode_config['stop_commands']:
@@ -396,6 +418,7 @@ class FortiGateConnection:
 @app.route('/api/debug-modes', methods=['GET'])
 def get_debug_modes():
     """获取所有可用的debug模式"""
+    logger.debug("Fetching available debug modes")
     modes = []
     for key, value in DEBUG_MODES.items():
         modes.append({
@@ -411,7 +434,9 @@ def get_debug_modes():
 def connect_fortigate():
     """连接到FortiGate"""
     data = request.json
-    
+
+    logger.info("Received connection request", extra={'host': data.get('host'), 'connection_type': data.get('connection_type', 'ssh')})
+
     host = data.get('host')
     port = data.get('port', 22)
     username = data.get('username')
@@ -424,20 +449,22 @@ def connect_fortigate():
     # 创建连接对象
     session_id = f"{host}_{username}_{int(time.time())}"
     conn = FortiGateConnection(host, port, username, password, connection_type)
-    
+
     # 尝试连接
     success, message = conn.connect()
-    
+
     if success:
         active_sessions[session_id] = conn
         usage_metrics['total_sessions'] += 1
         usage_metrics['unique_users'].add(username)
+        logger.info("Connection established", extra={'session_id': session_id, 'host': host, 'type': connection_type})
         return jsonify({
             'success': True,
             'session_id': session_id,
             'message': message
         })
     else:
+        logger.warning("Connection failed", extra={'host': host, 'type': connection_type, 'message': message})
         return jsonify({'success': False, 'message': message}), 500
 
 
@@ -447,12 +474,13 @@ def start_debug():
     data = request.json
     session_id = data.get('session_id')
     debug_mode = data.get('debug_mode')
-    
+
     if session_id not in active_sessions:
         return jsonify({'success': False, 'message': '无效的会话ID'}), 400
 
     conn = active_sessions[session_id]
     output_id = f"{session_id}_{debug_mode}_{int(time.time())}"
+    logger.info("Starting debug", extra={'session_id': session_id, 'debug_mode': debug_mode, 'output_id': output_id})
     debug_outputs[output_id] = {
         'session_id': session_id,
         'debug_mode': debug_mode,
@@ -473,6 +501,7 @@ def start_debug():
     else:
         conn.current_output_id = None
         debug_outputs.pop(output_id, None)
+        logger.error("Failed to start debug", extra={'session_id': session_id, 'debug_mode': debug_mode, 'message': message})
         return jsonify({'success': False, 'message': message}), 500
 
 
@@ -483,11 +512,12 @@ def stop_debug():
     session_id = data.get('session_id')
     output_id = data.get('output_id')
     debug_mode = data.get('debug_mode')
-    
+
     if session_id not in active_sessions:
         return jsonify({'success': False, 'message': '无效的会话ID'}), 400
-    
+
     conn = active_sessions[session_id]
+    logger.info("Stopping debug", extra={'session_id': session_id, 'debug_mode': debug_mode, 'output_id': output_id})
     success, message = conn.stop_debug_monitoring(debug_mode)
 
     conn.current_output_id = None
@@ -509,12 +539,14 @@ def get_output():
     """获取debug输出"""
     data = request.json
     session_id = data.get('session_id')
-    
+
     if session_id not in active_sessions:
         return jsonify({'success': False, 'message': '无效的会话ID'}), 400
-    
+
     conn = active_sessions[session_id]
     output = conn.get_output()
+
+    logger.debug("Serving output", extra={'session_id': session_id, 'lines': len(output)})
 
     return jsonify({
         'success': True,
@@ -525,6 +557,14 @@ def get_output():
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
     """获取基础使用统计信息"""
+    logger.debug(
+        "Stats requested",
+        extra={
+            'total_sessions': usage_metrics['total_sessions'],
+            'unique_users': len(usage_metrics['unique_users']),
+            'active_sessions': len(active_sessions)
+        }
+    )
     return jsonify({
         'success': True,
         'total_sessions': usage_metrics['total_sessions'],
@@ -538,11 +578,20 @@ def download_output():
     """下载debug输出"""
     data = request.json
     output_id = data.get('output_id')
-    
+
     if output_id not in debug_outputs:
         return jsonify({'success': False, 'message': '无效的输出ID'}), 400
-    
+
     output_data = debug_outputs[output_id]
+    logger.info(
+        "Preparing download",
+        extra={
+            'output_id': output_id,
+            'session_id': output_data.get('session_id'),
+            'debug_mode': output_data.get('debug_mode'),
+            'lines': len(output_data.get('output', []))
+        }
+    )
     
     # 生成文件内容
     content = []
@@ -573,11 +622,12 @@ def disconnect():
     """断开连接"""
     data = request.json
     session_id = data.get('session_id')
-    
+
     if session_id in active_sessions:
         conn = active_sessions[session_id]
         conn.disconnect()
         del active_sessions[session_id]
+        logger.info("Disconnected session", extra={'session_id': session_id})
         return jsonify({'success': True, 'message': '已断开连接'})
     
     return jsonify({'success': False, 'message': '无效的会话ID'}), 400
@@ -592,13 +642,14 @@ def execute_command():
     
     if session_id not in active_sessions:
         return jsonify({'success': False, 'message': '无效的会话ID'}), 400
-    
+
     if not command:
         return jsonify({'success': False, 'message': '命令不能为空'}), 400
-    
+
     conn = active_sessions[session_id]
+    logger.info("Executing custom command", extra={'session_id': session_id, 'command': command})
     output = conn.send_command(command, wait_time=2)
-    
+
     return jsonify({
         'success': True,
         'output': output
