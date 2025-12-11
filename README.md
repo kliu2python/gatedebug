@@ -81,6 +81,19 @@ python -m http.server 8000
 
 Then visit `http://localhost:8000`.
 
+## Run with Docker Compose
+
+To start the backend API and a lightweight NGINX frontend together:
+
+```bash
+docker compose up --build
+```
+
+- Backend API: http://localhost:5000
+- Frontend UI: http://localhost:8080
+
+Use `docker compose down` to stop the services when finished.
+
 ### 4. Connect to FortiGate
 
 1. Fill in the connection form:
